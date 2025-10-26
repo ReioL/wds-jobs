@@ -3,7 +3,7 @@
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-export function AppSideBarCLient({ children }: { children: React.ReactNode }) {
+export function AppSidebarClient({ children }: { children: React.ReactNode }) {
   const isMobile = useIsMobile();
 
   if (isMobile) {

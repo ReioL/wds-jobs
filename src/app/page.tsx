@@ -10,7 +10,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { AppSideBarCLient } from "./_AppSidebarCLient";
+import { AppSidebarClient } from "../components/sidebar/_AppSidebarClient";
 import { LogInIcon } from "lucide-react";
 import Link from "next/link";
 import { SignedIn } from "@/services/clerk/components/SignInStatus";
@@ -20,7 +20,7 @@ import { SignedOut } from "@clerk/nextjs";
 export default function HomePage() {
   return (
     <SidebarProvider className="overflow-y-hidden">
-      <AppSideBarCLient>
+      <AppSidebarClient>
         <Sidebar collapsible="icon" className="overflow-hidden">
           <SidebarHeader className="flex-row">
             <SidebarTrigger />
@@ -53,7 +53,7 @@ export default function HomePage() {
           </SignedIn>
         </Sidebar>
         <main className="flex-1">main</main>
-      </AppSideBarCLient>
+      </AppSidebarClient>
     </SidebarProvider>
   );
 }

@@ -1,7 +1,15 @@
 import { Webhook } from "svix";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-import { clerkCreateUser, clerkDeleteUser, clerkUpdatedUser, Event } from "@/services/clerk/functions";
+import {
+  clerkCreateOrganization,
+  clerkCreateUser,
+  clerkDeleteOrganization,
+  clerkDeleteUser,
+  clerkUpdatedOrganization,
+  clerkUpdatedUser,
+  Event,
+} from "@/services/clerk/functions";
 
 const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET || "";
 
@@ -51,6 +59,15 @@ export async function POST(req: Request) {
       break;
     case "user.updated":
       await clerkUpdatedUser(data);
+      break;
+    case "organization.created":
+      await clerkCreateOrganization(data);
+      break;
+    case "organization.deleted":
+      await clerkDeleteOrganization(data);
+      break;
+    case "organization.updated":
+      await clerkUpdatedOrganization(data);
       break;
     default:
       console.log(`Unhandled event type: ${type}`);
