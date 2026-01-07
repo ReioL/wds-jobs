@@ -1,6 +1,6 @@
 import { db } from "@/drizzle/db";
 import { JobListingTable } from "@/drizzle/schema";
-import { getJobListingIdOrganizationTag } from "@/features/jobListings/db/cache/jobListings";
+import { getJobListingOrganizationTag } from "@/features/jobListings/db/cache/jobListings";
 import { getCurrentOrganization } from "@/services/clerk/lib/getCurrentAuth";
 import { desc, eq } from "drizzle-orm";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
@@ -29,7 +29,7 @@ async function SuspendedPage() {
 
 async function getMostRecentJobListing(orgId: string) {
   "use cache";
-  cacheTag(getJobListingIdOrganizationTag(orgId));
+  cacheTag(getJobListingOrganizationTag(orgId));
 
   return db.query.JobListingTable.findFirst({
     where: eq(JobListingTable.organizationId, orgId),

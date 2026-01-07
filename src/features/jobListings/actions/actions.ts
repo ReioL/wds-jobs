@@ -3,18 +3,21 @@
 import { getCurrentOrganization } from "@/services/clerk/lib/getCurrentAuth";
 import { redirect } from "next/navigation";
 import z from "zod";
-import { insertJobListing, updateJobListingDb } from "../db/jobListings";
+import { insertJobListing, updateJobListingDb, deleteJobListing as deleteJobListingDb } from "../db/jobListings";
 import { jobListingSchema } from "./schemas";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 import { getJobListingIdTag } from "../db/cache/jobListings";
 import { db } from "@/drizzle/db";
 import { and, eq } from "drizzle-orm";
 import { JobListingTable } from "@/drizzle/schema";
+import { hasOrgUserPermission } from "@/services/clerk/lib/orgUserPermissions";
+import { getNextJobListingStatus } from "../lib/utils";
+import { hasReachedMaxFeaturedJobListings, hasReachedMaxPublishedJobListings } from "../lib/planFeatureHelpers";
 
 export async function createJobListing(unsafeData: z.infer<typeof jobListingSchema>) {
   const { orgId } = await getCurrentOrganization();
 
-  if (orgId == null) {
+  if (orgId == null || !(await hasOrgUserPermission("org:job_listings:create"))) {
     return {
       error: true,
       message: "You don't have permission to create a job listing",
@@ -41,7 +44,7 @@ export async function createJobListing(unsafeData: z.infer<typeof jobListingSche
 export async function updateJobListing(id: string, unsafeData: z.infer<typeof jobListingSchema>) {
   const { orgId } = await getCurrentOrganization();
 
-  if (orgId == null /* || !(await hasOrgUserPermission("org:job_listings:update")) */) {
+  if (orgId == null || !(await hasOrgUserPermission("org:job_listings:update"))) {
     return {
       error: true,
       message: "You don't have permission to update this job listing",
@@ -69,7 +72,7 @@ export async function updateJobListing(id: string, unsafeData: z.infer<typeof jo
   redirect(`/employer/job-listings/${updatedJobListing.id}`);
 }
 
-/* export async function toggleJobListingStatus(id: string) {
+export async function toggleJobListingStatus(id: string) {
   const error = {
     error: true,
     message: "You don't have permission to update this job listing's status",
@@ -95,9 +98,9 @@ export async function updateJobListing(id: string, unsafeData: z.infer<typeof jo
   });
 
   return { error: false };
-} */
+}
 
-/* export async function toggleJobListingFeatured(id: string) {
+export async function toggleJobListingFeatured(id: string) {
   const error = {
     error: true,
     message: "You don't have permission to update this job listing's featured status",
@@ -121,9 +124,9 @@ export async function updateJobListing(id: string, unsafeData: z.infer<typeof jo
   });
 
   return { error: false };
-} */
+}
 
-/* export async function deleteJobListing(id: string) {
+export async function deleteJobListing(id: string) {
   const error = {
     error: true,
     message: "You don't have permission to delete this job listing",
@@ -141,7 +144,7 @@ export async function updateJobListing(id: string, unsafeData: z.infer<typeof jo
   await deleteJobListingDb(id);
 
   redirect("/employer");
-} */
+}
 
 /* export async function getAiJobListingSearchResults(
   unsafe: z.infer<typeof jobListingAiSearchSchema>
@@ -177,7 +180,7 @@ export async function updateJobListing(id: string, unsafeData: z.infer<typeof jo
   return { error: false, jobIds: matchedListings };
 } */
 
-async function getJobListing(id: string, orgId: string) {
+export async function getJobListing(id: string, orgId: string) {
   "use cache";
   cacheTag(getJobListingIdTag(id));
 
